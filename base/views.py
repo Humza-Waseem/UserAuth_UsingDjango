@@ -2,7 +2,9 @@ from django.shortcuts import render,redirect
 from django.contrib import messages  # importing the flash messages 
 # Create your views here.
 from .models import User
-from django.contrib.auth import authenticate,login
+from django.contrib.auth import authenticate,login,logout
+
+from .Forms import UserForm
 
 def UserSignIn(request):
     if request.method == 'POST':
@@ -25,7 +27,24 @@ def UserSignIn(request):
     context = {}
     return render(request,'base/login.html',context)
     
+def UserLogout(request):
+    logout(request)
+    messages.success(request, "You are logged out")
+    return redirect('home')
 
+
+def RegisterUser(request):
+    form = UserForm()
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit= False)
+            user.save()
+            login(request.user)
+            return redirect('home')
+        else:
+            messages.error(request, 'An error occured during registration')
+    return render(request,'base/RegisterUser.html',{'form':form}) 
 
 def Home(request):
     return render(request, 'base/home.html') 
